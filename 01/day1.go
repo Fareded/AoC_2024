@@ -2,7 +2,7 @@ package main
 
 import (
     "fmt"
-    "io/ioutil"
+    "os"
     "strings"
     "math"
     "strconv"
@@ -11,7 +11,7 @@ import (
 
 func main() {
     // Reads locationIds from file
-    data, err := ioutil.ReadFile("locationIDs.txt")
+    data, err := os.ReadFile("locationIDs.txt")
     check(err)
     sData := string(data)
 
