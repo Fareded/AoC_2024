@@ -58,6 +58,10 @@ func main() {
 
     //using prinf to print the full number
     fmt.Printf("Total Distance: %f\n", totalDistance)
+
+    similarityScore := calcSimilarityScore(idList1, idList2)
+
+    fmt.Printf("Similarity Score: %f\n", similarityScore)
 }
 
 // Error handling function
@@ -109,4 +113,22 @@ func sumList(arr []float64) float64 {
         sum += arr[i]
     }
     return sum
+}
+
+func calcSimilarityScore(list1, list2 []float64) float64 {
+    simScores := make([]float64, len(list1))
+
+    for i := 0 ; i < len(list1); i++ {
+        noSims := 0.0
+
+        for j := 0; j < len(list2); j++ {
+            if list1[i] == list2[j] {
+                noSims++
+            }
+        }
+
+        simScores[i] = list1[i] * noSims
+    } 
+
+    return sumList(simScores)
 }
