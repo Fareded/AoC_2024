@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
+
+	"github.com/Fareded/AoC_2024/aoc_helpers"
 	// "math"
 	// "strconv"
 )
@@ -12,9 +13,8 @@ import (
 func main() {
 
 	// Reads from file
-	data, err := os.ReadFile("wordSearch.txt")
-	check(err)
-	sData := string(data)
+	
+	sData := aoc_helpers.ReadFile("wordSearch.txt")
 
 	rows := strings.Split(sData, "\n")
 
@@ -31,13 +31,6 @@ func main() {
 	fmt.Println()
 	fmt.Print("Number x-mas' found: ", findX_Mas(wordSearch))
 	
-	
-}
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
 }
 
 // finding the number of "xmas"s

@@ -2,19 +2,19 @@ package main
 
 import (
 	"fmt"
-	"os"
 	// "strings"
 	"regexp"
 	// "math"
 	"strconv"
+
+	"github.com/Fareded/AoC_2024/aoc_helpers"
 )
 
 func main() {
 
 	// Reads from file
-	data, err := os.ReadFile("corruptedMemory.txt")
-	check(err)
-	sData := string(data)
+	
+	sData := aoc_helpers.ReadFile("corruptedMemory.txt")
 
 	validReg := regexp.MustCompile(`mul\(\d{1,3},\d{1,3}\)|don't\(\)|do\(\)`)
 
@@ -34,9 +34,9 @@ func main() {
 			mulsTemp := mulsReg.FindAllString(muls[i], -1)
 
 			x, err := strconv.ParseInt(mulsTemp[0], 10, 64)
-			check(err)
+			aoc_helpers.Check(err)
 			y, err := strconv.ParseInt(mulsTemp[1], 10, 64)
-			check(err)
+			aoc_helpers.Check(err)
 
 			z := x * y
 
@@ -48,9 +48,3 @@ func main() {
 	fmt.Println(mulsTotal)
 }
 
-// Error handling function
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
