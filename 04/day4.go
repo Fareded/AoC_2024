@@ -27,11 +27,11 @@ func main() {
 	}
 
 
-	fmt.Print("Number found: ", findX(wordSearch))
+	fmt.Print("Number xmas' found: ", findXmas(wordSearch))
 	fmt.Println()
-	// for i := 0; i < len(wordSearch); i++ {
-	// 	fmt.Println(wordSearch[i])
-	// }
+	fmt.Print("Number x-mas' found: ", findX_Mas(wordSearch))
+	
+	
 }
 
 func check(e error) {
@@ -40,7 +40,8 @@ func check(e error) {
 	}
 }
 
-func findX(wordSearch [][]string) int {
+// finding the number of "xmas"s
+func findXmas(wordSearch [][]string) int {
 	xmas := []string{"X", "M", "A", "S"}
 	xmasCount := 0
 
@@ -149,3 +150,45 @@ func dfs(wordSearch [][]string, row, column, index int, direction int) (bool, in
 		return true, 1
 	}
 }
+
+// finding the number of "x-mas"s
+func findX_Mas(wordSearch [][]string) int{
+	
+	xmasCount := 0
+
+	for i := 0; i < len(wordSearch); i++ {
+		for j := 0; j < len(wordSearch[i]); j++ {
+			if wordSearch[i][j] == "A" {
+				count := dfsX_mas(wordSearch, i, j)
+				xmasCount += count
+			}
+		}
+	}
+
+	return xmasCount
+}
+
+func dfsX_mas(wordSearch [][]string, row, column int) int {
+	
+
+	//makes sure we dont search out of bounds
+	r_outbound := row-1 < 0 || row+1 >= len(wordSearch)
+	c_outbound := column-1 < 0 || column+1 >= len(wordSearch[0])
+
+	if r_outbound || c_outbound {
+		return 0
+	}
+	TL := wordSearch[row-1][column-1]
+	TR := wordSearch[row-1][column+1]
+	BL := wordSearch[row+1][column-1]
+	BR := wordSearch[row+1][column+1]
+
+	if TL == "S" && BR == "M" || TL == "M" && BR == "S" {
+		if TR == "S" && BL == "M" || TR == "M" && BL == "S" {
+			return 1
+		}
+	}
+	
+	return 0
+}
+
