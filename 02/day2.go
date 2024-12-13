@@ -1,19 +1,17 @@
 package main
 
 import (
-    "fmt"
-    "os"
-    "strings"
-    "math"
-    "strconv"
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+	"github.com/Fareded/AoC_2024/aoc_helpers"
 )
 
 
 func main() {
     // Reads locationIds from file
-    data, err := os.ReadFile("reports.txt")
-    check(err)
-    sData := string(data)
+    sData := aoc_helpers.ReadFile("reports.txt")
 
     reports := strings.Split(sData, "\n")
 
@@ -23,8 +21,14 @@ func main() {
 	unsafe := 0
 
 	for i := 0; i < len(reports); i++ {
+		temp := strings.TrimSpace(reports[i])
+		report := strings.Split(temp , " ")
 
-		if reportCheck(reports[i]) {
+
+		if reportCheck(report) {
+			reportStatus[i] = "Safe"
+			safe++
+		} else if problemDampener(report) {
 			reportStatus[i] = "Safe"
 			safe++
 		} else {
@@ -39,25 +43,16 @@ func main() {
 
 }
 
-// Error handling function
-func check(e error) {
-    if e != nil {
-        panic(e)
-    }
-}
-
-func reportCheck(report string) bool {
-	report = strings.TrimSpace(report)
-	reportTemp := strings.Split(report, " ")
-	reportData := make([]float64, len(reportTemp))
+func reportCheck(report []string) bool {
+	reportData := make([]float64, len(report))
 	var err error
 
 	for i := 0; i < len(reportData); i++ {
-		reportData[i], err = strconv.ParseFloat(reportTemp[i],64)
-		check(err)
+		reportData[i], err = strconv.ParseFloat(report[i], 64)
+		aoc_helpers.Check(err)
 	}
 	
-	status := true
+	isSafe := true
 	var asc bool
 
 	// Check if the data starts by ascending or descending
@@ -75,19 +70,40 @@ func reportCheck(report string) bool {
 		rawDiff := reportData[i] -  reportData[i-1]
 		dataDiff := math.Abs(rawDiff)
 		if dataDiff < 1 || dataDiff > 3 {
-			status = false
+			isSafe = false
 		}
 
 		// Check for a change in the direction of the data
-		if asc == false && rawDiff > 0 {
-			status = false
-		} else if asc == true && rawDiff < 0 {
-			status = false
+		if !asc && rawDiff > 0 {
+			isSafe = false
+		} else if asc && rawDiff < 0 {
+			isSafe = false
 		}
 
-		if status == false {
+		if !isSafe {
 			break
 		}
 	}
-	return status
+	return isSafe
+}
+
+func problemDampener(report []string) bool{
+	var valid bool
+	tempReport := make([]string, len(report))
+	
+	for i := 0; i < len(report); i++ {
+	copy(tempReport, report)
+		if i == 0 {
+			valid = reportCheck(report[1:])
+		} else if i == len(tempReport) - 1 {
+			valid = reportCheck(tempReport[:len(tempReport) - 1])
+		} else {
+			valid = reportCheck(append(tempReport[:i], tempReport[i+1:]...))
+		}
+		if valid{
+			return true
+		}
+		
+	}
+	return false
 }
