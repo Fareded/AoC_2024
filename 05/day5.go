@@ -14,17 +14,28 @@ func main() {
 	rules, pages := parseData()
 	validPages := 0
 	var midTotal int64 = 0
+	reorderValid := 0
+	var reMidTotal int64 = 0
 
 	for i := 0; i < len(pages); i++ {
 		valid, mid := ruleEnforcer(rules, strings.Split(pages[i], ","))
-		if valid{
+		if valid {
 			validPages++
 			midTotal += mid
+		}else{
+			reordered := reorderPage(rules, strings.Split(pages[i], ","))
+			valid, mid := ruleEnforcer(rules, reordered)
+			if valid {
+				reorderValid++
+				reMidTotal += mid
+			}
 		}
 	}
 
 	fmt.Println("Valid Pages: ", validPages)
 	fmt.Println("Mid Total: ", midTotal)
+	fmt.Println("Reordered Pages: ", reorderValid)
+	fmt.Println("Reordered Mid Total: ", reMidTotal)
 }
 
 func parseData() ([][]string, []string) {
@@ -48,27 +59,13 @@ func parseData() ([][]string, []string) {
 	return rules, pages
 }
 
-// find current value
-// find the rules that matches the current value
-// find the corresponding value in each rule within the page
-// record their positions
-// compare to the position of the current value
-
-func ruleEnforcer(rules [][]string, page []string) (bool, int64){
-	
+//Checks if a page follows the rules given
+func ruleEnforcer(rules [][]string, page []string) (bool, int64) {
 
 	for i := 0; i < len(page); i++ {
-		match := make([]string, 0)
-
-		for j := 0; j < len(rules); j++ {
-			//finding relevant rules
-			if page[i] == rules[j][0] {
-				match = append(match, rules[j][1])
-			}
-			
-		}
+		match := findRules(rules, page, i)
 		for k := 0; k < len(page); k++ {
-			if  contains(match, page[k]) {
+			if contains(match, page[k]) {
 				if k < i {
 					return false, 0
 				}
@@ -83,6 +80,21 @@ func ruleEnforcer(rules [][]string, page []string) (bool, int64){
 	return true, mid
 }
 
+//helper function to find the rules that determine the values the input comes before
+func findRules(rules [][]string, page []string, targetValue int) []string {
+	match := make([]string, 0)
+
+	for i := 0; i < len(rules); i++ {
+		//finding relevant rules
+		if page[targetValue] == rules[i][0] {
+			match = append(match, rules[i][1])
+		}
+	}
+
+	return match
+}
+
+//helper function to check if a string is in a slice (aka a value in a rules list)
 func contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -90,4 +102,64 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func reorderPage(allRules [][]string, page []string) []string {
+	
+	rules := make([][]string, len(page))
+
+	for i := 0; i < len(page); i++ {
+		rules[i] = append(rules[i], page[i])
+		rules[i] = append(rules[i], findRules(allRules, page, i)...)
+	}
+
+	reordered := mergeSort(page, rules)
+
+	return reordered
+}
+
+//merge sort for reordering a page
+func mergeSort(arr []string, rules [][]string) []string {
+	if len(arr) <= 1 {
+		return arr
+	}
+
+	middle := len(arr) / 2
+	left := mergeSort(arr[:middle], rules)
+	right := mergeSort(arr[middle:], rules)
+
+	return merge(left, right, rules)
+}
+
+func merge(left, right []string, rules [][]string) []string {
+	size, i, j := len(left)+len(right), 0, 0
+	sorted := make([]string, size)
+
+	for k := 0; k < size; k++ {
+		if i > len(left)-1 && j <= len(right)-1 {
+			sorted[k] = right[j]
+			j++
+		} else if j > len(right)-1 && i <= len(left)-1 {
+			sorted[k] = left[i]
+			i++
+		} else if contains(getMyRules(left[i], rules), right[j]) {
+			sorted[k] = left[i]
+			i++
+		} else {
+			sorted[k] = right[j]
+			j++
+		}
+	}
+
+	return sorted
+}
+
+func getMyRules(x string, y [][]string) []string {
+
+	for i := 0; i < len(y); i++ {
+		if y[i][0] == x {
+			return y[i][1:]
+		}
+	}
+	return nil
 }
